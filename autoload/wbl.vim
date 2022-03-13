@@ -1,7 +1,7 @@
 "------------------------------------------------------
 " init
 "------------------------------------------------------
-func WblInit()
+func wbl#WblInit()
   " set defaults
   let s:wbl_key = "\<End>"
   let s:wbl_max = 10

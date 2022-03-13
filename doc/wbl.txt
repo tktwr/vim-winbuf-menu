@@ -1,4 +1,4 @@
-*winbuf-menu.txt*
+*winbuf-menu.txt* a pop-up menu for displaying a window-specific buffer list
 
 Author  : Takehiro Tawara
 License : MIT license
