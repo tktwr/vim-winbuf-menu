@@ -72,14 +72,15 @@ endfunc
 " public func
 "------------------------------------------------------
 func WblPrint()
-  if v:version >= 802
-    call WblPopupMenu()
-  else
-    for i in w:buflist
-      let s = printf("%3d %s ", i, bufname(i))
-      echo s
-    endfor
-  endif
+  call WblPopupMenu()
+  "if v:version >= 802
+  "  call WblPopupMenu()
+  "else
+  "  for i in w:buflist
+  "    let s = printf("%3d %s ", i, bufname(i))
+  "    echo s
+  "  endfor
+  "endif
 endfunc
 
 func WblCopy()
@@ -201,6 +202,10 @@ func WblPopupMenuFilter(id, key)
   return popup_filter_menu(a:id, a:key)
 endfunc
 
+func WblPopupMenuHandlerStr(str)
+  echo a:str
+endfunc
+
 func WblPopupMenuHandler(id, result)
   if a:result == 0
   elseif a:result > 0
@@ -234,15 +239,40 @@ func WblPopupMenu()
     call add(l, s)
   endif
 
-  call popup_menu(l, #{
-    \ filter: 'WblPopupMenuFilter',
-    \ callback: 'WblPopupMenuHandler',
-    \ border: [0,0,0,0],
-    \ padding: [0,0,0,0],
-    \ pos: 'botleft',
-    \ line: 'cursor-1',
-    \ col: 'cursor',
-    \ moved: 'WORD',
-    \ })
+  call WblPopupMenuImpl(l)
+  "call popup_menu(l, #{
+  "  \ filter: 'WblPopupMenuFilter',
+  "  \ callback: 'WblPopupMenuHandler',
+  "  \ border: [0,0,0,0],
+  "  \ padding: [0,0,0,0],
+  "  \ pos: 'botleft',
+  "  \ line: 'cursor-1',
+  "  \ col: 'cursor',
+  "  \ moved: 'WORD',
+  "  \ })
 endfunc
 
+func WblPopupMenuImpl(list)
+  if exists('*popup_menu')
+      " Vim
+      "let callback_fn = {win_id, index -> s:my_callback_idx(index)}
+      call popup_menu(a:list, #{
+        \ filter: 'WblPopupMenuFilter',
+        \ callback: 'WblPopupMenuHandler',
+        \ border: [0,0,0,0],
+        \ padding: [0,0,0,0],
+        \ pos: 'botleft',
+        \ line: 'cursor-1',
+        \ col: 'cursor',
+        \ moved: 'WORD',
+        \ })
+  elseif has('nvim') && exists('g:loaded_popup_menu_plugin')
+      " Neovim
+      let callback_fn = {selected_str -> WblPopupMenuHandlerStr(selected_str)}
+      call popup_menu#open(a:list, callback_fn)
+  else
+      " Old vim/neovim
+      "let index = inputlist(...)
+      "call s:my_callback_idx(index)
+  endif
+endfunc
