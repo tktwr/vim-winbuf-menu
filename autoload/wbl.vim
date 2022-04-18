@@ -6,7 +6,7 @@ func wbl#WblInit()
   let s:wbl_key = "\<End>"
   let s:wbl_max = 10
   let s:wbl_help = 0
-  let s:wbl_edit_func = "WblEdit"
+  let s:wbl_edit_func = "wbl#WblEdit"
 
   " use the bmk func if it has already been loaded
   if exists("*BmkEdit")
@@ -25,20 +25,20 @@ endfunc
 "------------------------------------------------------
 " private func
 "------------------------------------------------------
-func WblRemoveBufnr(lst, bufnr)
+func s:WblRemoveBufnr(lst, bufnr)
   let i = match(a:lst, a:bufnr)
   if i != -1
     call remove(a:lst, i)
   endif
 endfunc
 
-func WblTruncateList(lst, max)
+func s:WblTruncateList(lst, max)
   if (len(a:lst) > a:max)
     call remove(a:lst, a:max, -1)
   endif
 endfunc
 
-func WblFindIdxByName(lst, pattern)
+func s:WblFindIdxByName(lst, pattern)
   let idx = 0
   for i in a:lst
     let s = bufname(i)
@@ -50,31 +50,31 @@ func WblFindIdxByName(lst, pattern)
   return -1
 endfunc
 
-func WblFind(pattern, winnr)
+"------------------------------------------------------
+" public func
+"------------------------------------------------------
+func wbl#WblFind(pattern, winnr)
   if a:winnr > 0
     exec a:winnr."wincmd w"
   endif
 
-  let idx = WblFindIdxByName(w:buflist, a:pattern)
+  let idx = s:WblFindIdxByName(w:buflist, a:pattern)
   if (idx != -1)
     exec w:buflist[idx]."b"
   endif
 endfunc
 
-func WblEdit(file, winnr)
+func wbl#WblEdit(file, winnr)
   if a:winnr > 0
     exec a:winnr."wincmd w"
   endif
   exec "edit" a:file
 endfunc
 
-"------------------------------------------------------
-" public func
-"------------------------------------------------------
-func WblPrint()
-  call WblPopupMenu()
+func wbl#WblPrint()
+  call wbl#WblPopupMenu()
   "if v:version >= 802
-  "  call WblPopupMenu()
+  "  call wbl#WblPopupMenu()
   "else
   "  for i in w:buflist
   "    let s = printf("%3d %s ", i, bufname(i))
@@ -83,16 +83,16 @@ func WblPrint()
   "endif
 endfunc
 
-func WblCopy()
+func wbl#WblCopy()
   let s:buflist = w:buflist
 endfunc
 
-func WblPaste()
+func wbl#WblPaste()
   let w:buflist += s:buflist
-  call WblTruncateList(w:buflist, s:wbl_max)
+  call s:WblTruncateList(w:buflist, s:wbl_max)
 endfunc
 
-func WblClear()
+func wbl#WblClear()
   if !exists("w:buflist")
     return
   endif
@@ -103,25 +103,25 @@ func WblClear()
   endif
 endfunc
 
-func WblNew()
+func wbl#WblNew()
   enew
 endfunc
 
-func WblPush(bufnr)
+func wbl#WblPush(bufnr)
   if !exists("w:buflist")
     let w:buflist = []
   endif
 
-  call WblRemoveBufnr(w:buflist, a:bufnr)
+  call s:WblRemoveBufnr(w:buflist, a:bufnr)
   call insert(w:buflist, a:bufnr)
-  call WblTruncateList(w:buflist, s:wbl_max)
+  call s:WblTruncateList(w:buflist, s:wbl_max)
 endfunc
 
-func WblPop()
+func wbl#WblPop()
   if len(w:buflist) == 1
     let bufnr = w:buflist[0]
-    call WblNew()
-    call WblPush(bufnr)
+    call wbl#WblNew()
+    call wbl#WblPush(bufnr)
   endif
 
   if len(w:buflist) > 1
@@ -130,22 +130,22 @@ func WblPop()
   endif
 endfunc
 
-func WblBufDelete(bufnr)
+func wbl#WblBufDelete(bufnr)
   if len(w:buflist) == 1
     let bufnr = w:buflist[0]
-    call WblNew()
-    call WblPush(bufnr)
+    call wbl#WblNew()
+    call wbl#WblPush(bufnr)
   endif
 
   if len(w:buflist) > 1
-    call WblRemoveBufnr(w:buflist, a:bufnr)
+    call s:WblRemoveBufnr(w:buflist, a:bufnr)
     exec w:buflist[0]."b"
     exec "bdelete" a:bufnr
   endif
 endfunc
 
 "------------------------------------------------------
-func WblPrev()
+func wbl#WblPrev()
   if !exists("w:buflist") || (len(w:buflist) <= 1)
     return
   endif
@@ -156,7 +156,7 @@ func WblPrev()
   exec w:buflist[0]."b"
 endfunc
 
-func WblNext()
+func wbl#WblNext()
   if !exists("w:buflist") || (len(w:buflist) <= 1)
     return
   endif
@@ -170,7 +170,7 @@ endfunc
 "------------------------------------------------------
 " popup menu
 "------------------------------------------------------
-func WblPopupMenuFilter(id, key)
+func wbl#WblPopupMenuFilter(id, key)
   let w:dst_winnr = 0
   if a:key == s:wbl_key
     call popup_close(a:id, 0)
@@ -178,19 +178,19 @@ func WblPopupMenuFilter(id, key)
   elseif a:key == "?"
     let s:wbl_help = 1 - s:wbl_help
     call popup_close(a:id, 0)
-    call WblPopupMenu()
+    call wbl#WblPopupMenu()
     return 1
   elseif a:key == "c"
     call popup_close(a:id, 0)
-    call WblCopy()
+    call wbl#WblCopy()
     return 1
   elseif a:key == "p"
     call popup_close(a:id, 0)
-    call WblPaste()
+    call wbl#WblPaste()
     return 1
   elseif a:key == "C"
     call popup_close(a:id, 0)
-    call WblClear()
+    call wbl#WblClear()
     return 1
   elseif a:key == "x"
     let w:dst_winnr = -1
@@ -202,11 +202,11 @@ func WblPopupMenuFilter(id, key)
   return popup_filter_menu(a:id, a:key)
 endfunc
 
-func WblPopupMenuHandlerStr(str)
+func wbl#WblPopupMenuHandlerStr(str)
   echom a:str
 endfunc
 
-func WblPopupMenuHandler(id, result)
+func wbl#WblPopupMenuHandler(id, result)
   if a:result == 0
   elseif a:result > 0
     let idx = a:result - 1
@@ -215,7 +215,7 @@ func WblPopupMenuHandler(id, result)
     if w:dst_winnr == 0
       exec bufnr."b"
     elseif w:dst_winnr == -1
-      call WblBufDelete(bufnr)
+      call wbl#WblBufDelete(bufnr)
     else
       let bufname = bufname(bufnr)
       let absname = fnamemodify(bufname, ":p")
@@ -224,7 +224,7 @@ func WblPopupMenuHandler(id, result)
   endif
 endfunc
 
-func WblPopupMenu()
+func wbl#WblPopupMenu()
   if !exists("w:buflist")
     return
   endif
@@ -239,10 +239,10 @@ func WblPopupMenu()
     call add(l, s)
   endif
 
-  call WblPopupMenuImpl(l)
+  call wbl#WblPopupMenuImpl(l)
   "call popup_menu(l, #{
-  "  \ filter: 'WblPopupMenuFilter',
-  "  \ callback: 'WblPopupMenuHandler',
+  "  \ filter: 'wbl#WblPopupMenuFilter',
+  "  \ callback: 'wbl#WblPopupMenuHandler',
   "  \ border: [0,0,0,0],
   "  \ padding: [0,0,0,0],
   "  \ pos: 'botleft',
@@ -252,7 +252,7 @@ func WblPopupMenu()
   "  \ })
 endfunc
 
-func WblPopupMenuImpl(list)
+func wbl#WblPopupMenuImpl(list)
   if exists('*popup_menu')
     " vim 8.1
     let menu_type = 1
@@ -268,8 +268,8 @@ func WblPopupMenuImpl(list)
   if menu_type == 1
     " vim 8.1
     call popup_menu(a:list, #{
-      \ filter: 'WblPopupMenuFilter',
-      \ callback: 'WblPopupMenuHandler',
+      \ filter: 'wbl#WblPopupMenuFilter',
+      \ callback: 'wbl#WblPopupMenuHandler',
       \ border: [0,0,0,0],
       \ padding: [0,0,0,0],
       \ pos: 'botleft',
@@ -279,12 +279,12 @@ func WblPopupMenuImpl(list)
       \ })
   elseif menu_type == 2
     " nvim with the plugin 'kamykn/popup-menu.nvim'
-    let Callback_fn = {selected_str -> WblPopupMenuHandlerStr(selected_str)}
+    let Callback_fn = {selected_str -> wbl#WblPopupMenuHandlerStr(selected_str)}
     call popup_menu#open(a:list, Callback_fn)
   elseif menu_type == 3
     " old vim / nvim
     let index = inputlist(a:list)
-    call WblPopupMenuHandler(0, index)
+    call wbl#WblPopupMenuHandler(0, index)
   else
     " print a list
     for i in a:list

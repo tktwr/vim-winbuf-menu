@@ -15,8 +15,8 @@ let g:loaded_wbl = 1
 "------------------------------------------------------
 augroup ag_wbl
   autocmd!
-  autocmd BufEnter *   call WblPush(bufnr('%'))
-  autocmd WinEnter *   call WblPush(bufnr('%'))
+  autocmd BufEnter *   call wbl#WblPush(bufnr('%'))
+  autocmd WinEnter *   call wbl#WblPush(bufnr('%'))
 augroup END
 
 "------------------------------------------------------
