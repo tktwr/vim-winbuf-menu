@@ -7,6 +7,18 @@ License : MIT license
 INTRODUCTION                                    *winbuf-menu-introduction*
 
 winbuf-menu is a pop-up menu for displaying a window-specific buffer list.
+
+==========================================================================
+INSTALL                                              *winbuf-menu-install*
+
+For vim-plug, install the plugin as follows.
+>
+        Plug 'tktwr/vim-winbuf-menu'
+<
+==========================================================================
+SETTING                                              *winbuf-menu-setting*
+
+Set mappings.
 >
         nnoremap <silent> <End>  <C-W>:silent call WblPrint()<CR>
         tnoremap <silent> <End>  <C-W>:silent call WblPrint()<CR>
