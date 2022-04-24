@@ -8,15 +8,24 @@ func wbl#WblInit()
   let s:wbl_help = 0
   let s:wbl_edit_func = "wbl#WblEdit"
 
-  " use the bmk func if it has already been loaded
-  if exists("*BmkEdit")
-    let s:wbl_edit_func = "BmkEdit"
+  call wbl#WblSetting()
+endfunc
+
+func wbl#WblSetting()
+  "------------------------------------------------------
+  " aux funcs
+  "------------------------------------------------------
+  if exists("*bmk#BmkEdit")
+    let s:wbl_edit_func = "bmk#BmkEdit"
   endif
 
-  " set global variables
+  "------------------------------------------------------
+  " user defined global variables
+  "------------------------------------------------------
   if exists("g:wbl_key")
     let s:wbl_key = g:wbl_key
   endif
+
   if exists("g:wbl_max")
     let s:wbl_max = g:wbl_max
   endif
