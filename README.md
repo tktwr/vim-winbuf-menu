@@ -9,6 +9,7 @@ Plug 'tktwr/vim-winbuf-menu'
 ~~~
 
 ## Map
+
 ~~~
 nnoremap <silent> <End>  <C-W>:silent call WblPrint()<CR>
 tnoremap <silent> <End>  <C-W>:silent call WblPrint()<CR>
