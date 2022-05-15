@@ -82,14 +82,6 @@ endfunc
 
 func wbl#WblPrint()
   call wbl#WblPopupMenu()
-  "if v:version >= 802
-  "  call wbl#WblPopupMenu()
-  "else
-  "  for i in w:buflist
-  "    let s = printf("%3d %s ", i, bufname(i))
-  "    echo s
-  "  endfor
-  "endif
 endfunc
 
 func wbl#WblCopy()
@@ -211,10 +203,8 @@ func wbl#WblPopupMenuFilter(id, key)
   return popup_filter_menu(a:id, a:key)
 endfunc
 
-func wbl#WblPopupMenuHandlerStr(str)
-  echom a:str
-endfunc
-
+"------------------------------------------------------
+" vim 8.1
 func wbl#WblPopupMenuHandler(id, result)
   if a:result == 0
   elseif a:result > 0
@@ -233,6 +223,13 @@ func wbl#WblPopupMenuHandler(id, result)
   endif
 endfunc
 
+" nvim
+func wbl#WblPopupMenuHandlerStr(str)
+  let bufnr = str2nr(a:str[0:2])
+  exec bufnr."b"
+endfunc
+
+"------------------------------------------------------
 func wbl#WblPopupMenu()
   if !exists("w:buflist")
     return
@@ -248,56 +245,47 @@ func wbl#WblPopupMenu()
     call add(l, s)
   endif
 
-  call wbl#WblPopupMenuImpl(l)
-  "call popup_menu(l, #{
-  "  \ filter: 'wbl#WblPopupMenuFilter',
-  "  \ callback: 'wbl#WblPopupMenuHandler',
-  "  \ border: [0,0,0,0],
-  "  \ padding: [0,0,0,0],
-  "  \ pos: 'botleft',
-  "  \ line: 'cursor-1',
-  "  \ col: 'cursor',
-  "  \ moved: 'WORD',
-  "  \ })
-endfunc
-
-func wbl#WblPopupMenuImpl(list)
-  if exists('*popup_menu')
-    " vim 8.1
-    let menu_type = 1
-  elseif has('nvim') && exists('g:loaded_popup_menu_plugin')
-    " nvim with the plugin 'kamykn/popup-menu.nvim'
-    let menu_type = 2
-  else
-    let menu_type = 0
-  endif
-
   let w:dst_winnr = 0
 
-  if menu_type == 1
-    " vim 8.1
-    call popup_menu(a:list, #{
-      \ filter: 'wbl#WblPopupMenuFilter',
-      \ callback: 'wbl#WblPopupMenuHandler',
-      \ border: [0,0,0,0],
-      \ padding: [0,0,0,0],
-      \ pos: 'botleft',
-      \ line: 'cursor-1',
-      \ col: 'cursor',
-      \ moved: 'WORD',
-      \ })
-  elseif menu_type == 2
-    " nvim with the plugin 'kamykn/popup-menu.nvim'
-    let Callback_fn = {selected_str -> wbl#WblPopupMenuHandlerStr(selected_str)}
-    call popup_menu#open(a:list, Callback_fn)
-  elseif menu_type == 3
-    " old vim / nvim
-    let index = inputlist(a:list)
-    call wbl#WblPopupMenuHandler(0, index)
+  if exists('*popup_menu')
+    call s:WblPopupMenuImplVim81(l)
+  elseif has('nvim') && exists('g:loaded_popup_menu_plugin')
+    call s:WblPopupMenuImplNvim(l)
   else
-    " print a list
-    for i in a:list
-      echo i
-    endfor
+    call s:WblPopupMenuImplInput(l)
   endif
 endfunc
+
+" vim 8.1
+func s:WblPopupMenuImplVim81(list)
+  call popup_menu(a:list, #{
+    \ filter: 'wbl#WblPopupMenuFilter',
+    \ callback: 'wbl#WblPopupMenuHandler',
+    \ border: [0,0,0,0],
+    \ padding: [0,0,0,0],
+    \ pos: 'botleft',
+    \ line: 'cursor-1',
+    \ col: 'cursor',
+    \ moved: 'WORD',
+    \ })
+endfunc
+
+" nvim with the plugin 'kamykn/popup-menu.nvim'
+func s:WblPopupMenuImplNvim(list)
+  let Callback_fn = {selected_str -> wbl#WblPopupMenuHandlerStr(selected_str)}
+  call popup_menu#open(a:list, Callback_fn)
+endfunc
+
+" old vim / nvim
+func s:WblPopupMenuImplInput(list)
+  let index = inputlist(a:list)
+  call wbl#WblPopupMenuHandler(0, index)
+endfunc
+
+" print a list
+func s:WblPopupMenuImplPrint(list)
+  for i in a:list
+    echo i
+  endfor
+endfunc
+
