@@ -5,7 +5,7 @@ func wbl#WblInit()
   " set defaults
   let s:wbl_key = "\<End>"
   let s:wbl_max = 10
-  let s:wbl_help = 0
+  let s:wbl_help = 1
   let s:wbl_edit_func = "wbl#WblEdit"
 
   call wbl#WblSetting()
@@ -241,14 +241,17 @@ func wbl#WblPopupMenu()
     call add(l, s)
   endfor
   if s:wbl_help
-    let s = printf("[CR:edit, 1-9:winnr, x:delete, c:copy, p:paste, C:clear]")
+    let separator = "────────────────────────────────────────────────────────────────"
+    let s = printf("[CR:edit, 1-9:winnr, x:delete, c:copy, p:paste, C:clear, ?:help]")
+    call add(l, separator)
     call add(l, s)
   endif
 
   let w:dst_winnr = 0
 
+  let title = ' wbl '
   if exists('*popup_menu')
-    call s:WblPopupMenuImplVim81(l)
+    call s:WblPopupMenuImplVim81(title, l)
   elseif has('nvim') && exists('g:loaded_popup_menu_plugin')
     call s:WblPopupMenuImplNvim(l)
   else
@@ -257,29 +260,36 @@ func wbl#WblPopupMenu()
 endfunc
 
 " vim 8.1
-func s:WblPopupMenuImplVim81(list)
-  call popup_menu(a:list, #{
+func s:WblPopupMenuImplVim81(title, list)
+  let opt = #{
+    \ title: a:title,
     \ filter: 'wbl#WblPopupMenuFilter',
     \ callback: 'wbl#WblPopupMenuHandler',
-    \ border: [0,0,0,0],
     \ padding: [0,0,0,0],
+    \ border: [1,1,1,1],
+    \ borderchars: ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
     \ pos: 'botleft',
     \ line: 'cursor-1',
     \ col: 'cursor',
     \ moved: 'WORD',
-    \ })
+    \ }
+  let winid = popup_menu(a:list, opt)
+  call win_execute(winid, 'setl syntax=wbl')
+  return winid
 endfunc
 
 " nvim with the plugin 'kamykn/popup-menu.nvim'
 func s:WblPopupMenuImplNvim(list)
   let Callback_fn = {selected_str -> wbl#WblPopupMenuHandlerStr(selected_str)}
   call popup_menu#open(a:list, Callback_fn)
+  return 0
 endfunc
 
 " old vim / nvim
 func s:WblPopupMenuImplInput(list)
   let index = inputlist(a:list)
   call wbl#WblPopupMenuHandler(0, index)
+  return 0
 endfunc
 
 " print a list
@@ -287,5 +297,6 @@ func s:WblPopupMenuImplPrint(list)
   for i in a:list
     echo i
   endfor
+  return 0
 endfunc
 
