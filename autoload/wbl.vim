@@ -7,6 +7,19 @@ func wbl#WblInit()
   let s:wbl_max = 10
   let s:wbl_help = 1
   let s:wbl_edit_func = "wbl#WblEdit"
+  let s:wbl_style = 1
+
+  if has('nvim')
+    let s:wbl_style = 0
+  endif
+
+  if s:wbl_style == 0
+    let s:separator = "----------------------------------------------------------------"
+  elseif s:wbl_style == 1
+    let s:separator = "────────────────────────────────────────────────────────────────"
+  endif
+
+  let s:help_text = "[CR:edit, 1-9:winnr, x:delete, c:copy, p:paste, C:clear, ?:help]"
 
   call wbl#WblSetting()
 endfunc
@@ -241,10 +254,8 @@ func wbl#WblPopupMenu()
     call add(l, s)
   endfor
   if s:wbl_help
-    let separator = "────────────────────────────────────────────────────────────────"
-    let s = printf("[CR:edit, 1-9:winnr, x:delete, c:copy, p:paste, C:clear, ?:help]")
-    call add(l, separator)
-    call add(l, s)
+    call add(l, s:separator)
+    call add(l, s:help_text)
   endif
 
   let w:dst_winnr = 0
