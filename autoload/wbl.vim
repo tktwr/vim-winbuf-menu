@@ -262,12 +262,16 @@ func wbl#WblPopupMenu()
 
   let title = ' wbl '
   if exists('*popup_menu')
-    call s:WblPopupMenuImplVim81(title, l)
+    let winid = s:WblPopupMenuImplVim81(title, l)
   elseif has('nvim') && exists('g:loaded_popup_menu_plugin')
-    call s:WblPopupMenuImplNvim(l)
+    let winid = s:WblPopupMenuImplNvim(l)
+  elseif has('nvim') && exists('g:loaded_popup_menu')
+    let winid = s:WblPopupMenuImplNvim2(l)
   else
-    call s:WblPopupMenuImplInput(l)
+    let winid = s:WblPopupMenuImplInput(l)
   endif
+  call win_execute(winid, 'setl syntax=wbl')
+  return winid
 endfunc
 
 " vim 8.1
@@ -285,7 +289,6 @@ func s:WblPopupMenuImplVim81(title, list)
     \ moved: 'WORD',
     \ }
   let winid = popup_menu(a:list, opt)
-  call win_execute(winid, 'setl syntax=wbl')
   return winid
 endfunc
 
@@ -293,6 +296,14 @@ endfunc
 func s:WblPopupMenuImplNvim(list)
   let Callback_fn = {selected_str -> wbl#WblPopupMenuHandlerStr(selected_str)}
   call popup_menu#open(a:list, Callback_fn)
+  return 0
+endfunc
+
+" nvim with the plugin 'Ajnasz/vim-popup-menu'
+func s:WblPopupMenuImplNvim2(list)
+  let Callback_fn = {selected_str -> wbl#WblPopupMenuHandlerStr(selected_str)}
+  call popup_menu#open(a:list, Callback_fn)
+  set signcolumn=auto
   return 0
 endfunc
 
