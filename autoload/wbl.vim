@@ -72,14 +72,6 @@ func s:WblFindIdxByName(lst, pattern)
   return -1
 endfunc
 
-func wbl#lcd_here()
-  let file = expand('%:p')
-  if filereadable(file)
-    let dir = fnamemodify(file, ':h')
-    exec "lcd" dir
-  endif
-endfunc
-
 "------------------------------------------------------
 " public func
 "------------------------------------------------------
@@ -241,8 +233,6 @@ func wbl#WblPopupMenuHandler(id, result)
       let absname = fnamemodify(bufname, ":p")
       exec printf('call %s("%s", %d)', s:wbl_edit_func, absname, w:dst_winnr)
     endif
-
-    call wbl#lcd_here()
   endif
 endfunc
 
@@ -250,8 +240,6 @@ endfunc
 func wbl#WblPopupMenuHandlerStr(str)
   let bufnr = str2nr(a:str[0:2])
   exec bufnr."b"
-
-  call wbl#lcd_here()
 endfunc
 
 "------------------------------------------------------
