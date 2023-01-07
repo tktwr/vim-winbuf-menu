@@ -7,18 +7,7 @@ func wbl#WblInit()
   let s:wbl_max = 10
   let s:wbl_help = 1
   let s:wbl_edit_func = "wbl#WblEdit"
-  let s:wbl_style = 1
-
-  if has('nvim')
-    let s:wbl_style = 0
-  endif
-
-  if s:wbl_style == 0
-    let s:separator = "----------------------------------------------------------------"
-  elseif s:wbl_style == 1
-    let s:separator = "────────────────────────────────────────────────────────────────"
-  endif
-
+  let s:separator = "────────────────────────────────────────────────────────────────"
   let s:help_text = "[CR:edit, 1-9:winnr, x:delete, c:copy, p:paste, C:clear, ?:help]"
 
   call wbl#WblSetting()
@@ -184,7 +173,7 @@ endfunc
 "------------------------------------------------------
 " popup menu
 "------------------------------------------------------
-func wbl#WblPopupMenuFilter(id, key)
+func wbl#filter(id, key)
   let w:dst_winnr = 0
   if a:key == s:wbl_key
     call popup_close(a:id, 0)
@@ -218,7 +207,7 @@ endfunc
 
 "------------------------------------------------------
 " vim 8.1
-func wbl#WblPopupMenuHandler(id, result)
+func wbl#handler(id, result)
   if a:result == 0
   elseif a:result > 0
     let idx = a:result - 1
@@ -237,7 +226,7 @@ func wbl#WblPopupMenuHandler(id, result)
 endfunc
 
 " nvim
-func wbl#WblPopupMenuHandlerStr(str)
+func wbl#handler_str(str)
   let bufnr = str2nr(a:str[0:2])
   exec bufnr."b"
 endfunc
@@ -262,63 +251,13 @@ func wbl#WblPopupMenu()
 
   let title = ' wbl '
   if exists('*popup_menu')
-    let winid = s:WblPopupMenuImplVim81(title, l)
-  elseif has('nvim') && exists('g:loaded_popup_menu_plugin')
-    let winid = s:WblPopupMenuImplNvim(l)
+    " vim 8.1
+    let winid = cpm#popup_menu#open(title, l, 'wbl#handler', 'wbl#filter')
   elseif has('nvim') && exists('g:loaded_popup_menu')
-    let winid = s:WblPopupMenuImplNvim2(l)
-  else
-    let winid = s:WblPopupMenuImplInput(l)
+    " nvim with the plugin 'Ajnasz/vim-popup-menu'
+    let winid = cpm#popup_menu#open(title, l, 'wbl#handler_str', '')
   endif
   call win_execute(winid, 'setl syntax=wbl')
   return winid
-endfunc
-
-" vim 8.1
-func s:WblPopupMenuImplVim81(title, list)
-  let opt = #{
-    \ title: a:title,
-    \ filter: 'wbl#WblPopupMenuFilter',
-    \ callback: 'wbl#WblPopupMenuHandler',
-    \ padding: [0,0,0,0],
-    \ border: [1,1,1,1],
-    \ borderchars: ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
-    \ pos: 'botleft',
-    \ line: 'cursor-1',
-    \ col: 'cursor',
-    \ moved: 'WORD',
-    \ }
-  let winid = popup_menu(a:list, opt)
-  return winid
-endfunc
-
-" nvim with the plugin 'kamykn/popup-menu.nvim'
-func s:WblPopupMenuImplNvim(list)
-  let Callback_fn = {selected_str -> wbl#WblPopupMenuHandlerStr(selected_str)}
-  call popup_menu#open(a:list, Callback_fn)
-  return 0
-endfunc
-
-" nvim with the plugin 'Ajnasz/vim-popup-menu'
-func s:WblPopupMenuImplNvim2(list)
-  let Callback_fn = {selected_str -> wbl#WblPopupMenuHandlerStr(selected_str)}
-  call popup_menu#open(a:list, Callback_fn)
-  set signcolumn=auto
-  return 0
-endfunc
-
-" old vim / nvim
-func s:WblPopupMenuImplInput(list)
-  let index = inputlist(a:list)
-  call wbl#WblPopupMenuHandler(0, index)
-  return 0
-endfunc
-
-" print a list
-func s:WblPopupMenuImplPrint(list)
-  for i in a:list
-    echo i
-  endfor
-  return 0
 endfunc
 
