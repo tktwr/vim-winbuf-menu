@@ -1,19 +1,19 @@
 "------------------------------------------------------
 " init
 "------------------------------------------------------
-func wbl#WblInit()
+func wbl#init()
   " set defaults
   let s:wbl_key = "\<End>"
   let s:wbl_max = 10
   let s:wbl_help = 1
-  let s:wbl_edit_func = "wbl#WblEdit"
+  let s:wbl_edit_func = "wbl#edit"
   let s:separator = "────────────────────────────────────────────────────────────────"
   let s:help_text = "[CR:edit, 1-9:winnr, x:delete, c:copy, p:paste, C:clear, ?:help]"
 
-  call wbl#WblSetting()
+  call wbl#settings()
 endfunc
 
-func wbl#WblSetting()
+func wbl#settings()
   "------------------------------------------------------
   " aux funcs
   "------------------------------------------------------
@@ -36,20 +36,20 @@ endfunc
 "------------------------------------------------------
 " private func
 "------------------------------------------------------
-func s:WblRemoveBufnr(lst, bufnr)
+func s:RemoveBufnr(lst, bufnr)
   let i = match(a:lst, a:bufnr)
   if i != -1
     call remove(a:lst, i)
   endif
 endfunc
 
-func s:WblTruncateList(lst, max)
+func s:TruncateList(lst, max)
   if (len(a:lst) > a:max)
     call remove(a:lst, a:max, -1)
   endif
 endfunc
 
-func s:WblFindIdxByName(lst, pattern)
+func s:FindIdxByName(lst, pattern)
   let idx = 0
   for i in a:lst
     let s = bufname(i)
@@ -64,38 +64,34 @@ endfunc
 "------------------------------------------------------
 " public func
 "------------------------------------------------------
-func wbl#WblFind(pattern, winnr)
+func wbl#find(pattern, winnr)
   if a:winnr > 0
     exec a:winnr."wincmd w"
   endif
 
-  let idx = s:WblFindIdxByName(w:buflist, a:pattern)
+  let idx = s:FindIdxByName(w:buflist, a:pattern)
   if (idx != -1)
     exec w:buflist[idx]."b"
   endif
 endfunc
 
-func wbl#WblEdit(file, winnr)
+func wbl#edit(file, winnr)
   if a:winnr > 0
     exec a:winnr."wincmd w"
   endif
   exec "edit" a:file
 endfunc
 
-func wbl#WblPrint()
-  call wbl#WblPopupMenu()
-endfunc
-
-func wbl#WblCopy()
+func wbl#copy()
   let s:buflist = w:buflist
 endfunc
 
-func wbl#WblPaste()
+func wbl#paste()
   let w:buflist += s:buflist
-  call s:WblTruncateList(w:buflist, s:wbl_max)
+  call s:TruncateList(w:buflist, s:wbl_max)
 endfunc
 
-func wbl#WblClear()
+func wbl#clear()
   if !exists("w:buflist")
     return
   endif
@@ -106,25 +102,25 @@ func wbl#WblClear()
   endif
 endfunc
 
-func wbl#WblNew()
+func wbl#new()
   enew
 endfunc
 
-func wbl#WblPush(bufnr)
+func wbl#push(bufnr)
   if !exists("w:buflist")
     let w:buflist = []
   endif
 
-  call s:WblRemoveBufnr(w:buflist, a:bufnr)
+  call s:RemoveBufnr(w:buflist, a:bufnr)
   call insert(w:buflist, a:bufnr)
-  call s:WblTruncateList(w:buflist, s:wbl_max)
+  call s:TruncateList(w:buflist, s:wbl_max)
 endfunc
 
-func wbl#WblPop()
+func wbl#pop()
   if len(w:buflist) == 1
     let bufnr = w:buflist[0]
-    call wbl#WblNew()
-    call wbl#WblPush(bufnr)
+    call wbl#new()
+    call wbl#push(bufnr)
   endif
 
   if len(w:buflist) > 1
@@ -133,22 +129,22 @@ func wbl#WblPop()
   endif
 endfunc
 
-func wbl#WblBufDelete(bufnr)
+func wbl#buf_delete(bufnr)
   if len(w:buflist) == 1
     let bufnr = w:buflist[0]
-    call wbl#WblNew()
-    call wbl#WblPush(bufnr)
+    call wbl#new()
+    call wbl#push(bufnr)
   endif
 
   if len(w:buflist) > 1
-    call s:WblRemoveBufnr(w:buflist, a:bufnr)
+    call s:RemoveBufnr(w:buflist, a:bufnr)
     exec w:buflist[0]."b"
     exec "bdelete" a:bufnr
   endif
 endfunc
 
 "------------------------------------------------------
-func wbl#WblPrev()
+func wbl#prev()
   if !exists("w:buflist") || (len(w:buflist) <= 1)
     return
   endif
@@ -159,7 +155,7 @@ func wbl#WblPrev()
   exec w:buflist[0]."b"
 endfunc
 
-func wbl#WblNext()
+func wbl#next()
   if !exists("w:buflist") || (len(w:buflist) <= 1)
     return
   endif
@@ -181,19 +177,19 @@ func wbl#filter(id, key)
   elseif a:key == "?"
     let s:wbl_help = 1 - s:wbl_help
     call popup_close(a:id, 0)
-    call wbl#WblPopupMenu()
+    call wbl#open()
     return 1
   elseif a:key == "c"
     call popup_close(a:id, 0)
-    call wbl#WblCopy()
+    call wbl#copy()
     return 1
   elseif a:key == "p"
     call popup_close(a:id, 0)
-    call wbl#WblPaste()
+    call wbl#paste()
     return 1
   elseif a:key == "C"
     call popup_close(a:id, 0)
-    call wbl#WblClear()
+    call wbl#clear()
     return 1
   elseif a:key == "x"
     let w:dst_winnr = -1
@@ -216,7 +212,7 @@ func wbl#handler(id, result)
     if w:dst_winnr == 0
       exec bufnr."b"
     elseif w:dst_winnr == -1
-      call wbl#WblBufDelete(bufnr)
+      call wbl#buf_delete(bufnr)
     else
       let bufname = bufname(bufnr)
       let absname = fnamemodify(bufname, ":p")
@@ -232,7 +228,7 @@ func wbl#handler_str(str)
 endfunc
 
 "------------------------------------------------------
-func wbl#WblPopupMenu()
+func wbl#open()
   if !exists("w:buflist")
     return
   endif

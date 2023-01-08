@@ -10,11 +10,11 @@ Install plugins using a plugin manager such as
 [vim-plug](https://github.com/junegunn/vim-plug).
 
 Install
-[popup-menu.nvim](https://github.com/kamykn/popup-menu.nvim)
+[vim-popup-menu](https://github.com/Ajnasz/vim-popup-menu)
 to support a popup menu in neovim.
 ~~~
 if has('nvim')
-  Plug 'kamykn/popup-menu.nvim'
+  Plug 'Ajnasz/vim-popup-menu'
 endif
 ~~~
 
@@ -26,7 +26,7 @@ Plug 'tktwr/vim-winbuf-menu'
 ## Maps
 
 ~~~
-nnoremap <silent> <End>  <C-W>:silent call WblPrint()<CR>
-tnoremap <silent> <End>  <C-W>:silent call WblPrint()<CR>
+nnoremap <silent> <End>  <C-W>:silent call wbl#open()<CR>
+tnoremap <silent> <End>  <C-W>:silent call wbl#open()<CR>
 ~~~
 
