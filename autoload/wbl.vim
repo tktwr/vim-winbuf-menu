@@ -17,8 +17,8 @@ func wbl#settings()
   "------------------------------------------------------
   " aux funcs
   "------------------------------------------------------
-  if exists("*bmk#BmkEdit")
-    let s:wbl_edit_func = "bmk#BmkEdit"
+  if exists("*bmk#Edit")
+    let s:wbl_edit_func = "bmk#Edit"
   endif
 
   "------------------------------------------------------
