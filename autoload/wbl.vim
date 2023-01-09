@@ -2,34 +2,18 @@
 " init
 "------------------------------------------------------
 func wbl#init()
-  " set defaults
-  let s:wbl_key = "\<End>"
-  let s:wbl_max = 10
-  let s:wbl_help = 1
-  let s:wbl_edit_func = "wbl#edit"
-  let s:separator = "────────────────────────────────────────────────────────────────"
-  let s:help_text = "[CR:edit, 1-9:winnr, x:delete, c:copy, p:paste, C:clear, ?:help]"
+  let g:wbl_help = 1
+  let g:wbl_separator = '────────────────────────────────────────────────────────────────'
+  let g:wbl_help_text = '[CR:edit, 1-9:winnr, x:delete, c:copy, p:paste, C:clear, ?:help]'
 
-  call wbl#settings()
-endfunc
-
-func wbl#settings()
-  "------------------------------------------------------
-  " aux funcs
-  "------------------------------------------------------
-  if exists("*bmk#Edit")
-    let s:wbl_edit_func = "bmk#Edit"
+  if !exists('g:wbl_edit_func')
+    let g:wbl_edit_func = 'wbl#edit'
   endif
-
-  "------------------------------------------------------
-  " user defined global variables
-  "------------------------------------------------------
-  if exists("g:wbl_key")
-    let s:wbl_key = g:wbl_key
+  if !exists('g:wbl_key')
+    let g:wbl_key = '\<End>'
   endif
-
-  if exists("g:wbl_max")
-    let s:wbl_max = g:wbl_max
+  if !exists('g:wbl_max')
+    let g:wbl_max = 10
   endif
 endfunc
 
@@ -64,7 +48,7 @@ endfunc
 "------------------------------------------------------
 " public func
 "------------------------------------------------------
-func wbl#find(pattern, winnr)
+func wbl#find(pattern, winnr=0)
   if a:winnr > 0
     exec a:winnr."wincmd w"
   endif
@@ -75,7 +59,7 @@ func wbl#find(pattern, winnr)
   endif
 endfunc
 
-func wbl#edit(file, winnr)
+func wbl#edit(file, winnr=0)
   if a:winnr > 0
     exec a:winnr."wincmd w"
   endif
@@ -88,7 +72,7 @@ endfunc
 
 func wbl#paste()
   let w:buflist += s:buflist
-  call s:TruncateList(w:buflist, s:wbl_max)
+  call s:TruncateList(w:buflist, g:wbl_max)
 endfunc
 
 func wbl#clear()
@@ -113,7 +97,7 @@ func wbl#push(bufnr)
 
   call s:RemoveBufnr(w:buflist, a:bufnr)
   call insert(w:buflist, a:bufnr)
-  call s:TruncateList(w:buflist, s:wbl_max)
+  call s:TruncateList(w:buflist, g:wbl_max)
 endfunc
 
 func wbl#pop()
@@ -171,11 +155,11 @@ endfunc
 "------------------------------------------------------
 func wbl#filter(id, key)
   let w:dst_winnr = 0
-  if a:key == s:wbl_key
+  if a:key == g:wbl_key
     call popup_close(a:id, 0)
     return 1
   elseif a:key == "?"
-    let s:wbl_help = 1 - s:wbl_help
+    let g:wbl_help = 1 - g:wbl_help
     call popup_close(a:id, 0)
     call wbl#open()
     return 1
@@ -216,7 +200,7 @@ func wbl#handler(id, result)
     else
       let bufname = bufname(bufnr)
       let absname = fnamemodify(bufname, ":p")
-      exec printf('call %s("%s", %d)', s:wbl_edit_func, absname, w:dst_winnr)
+      exec printf('call %s("%s", %d)', g:wbl_edit_func, absname, w:dst_winnr)
     endif
   endif
 endfunc
@@ -238,9 +222,9 @@ func wbl#open()
     let s = printf("%3d %s ", i, bufname(i))
     call add(l, s)
   endfor
-  if s:wbl_help
-    call add(l, s:separator)
-    call add(l, s:help_text)
+  if g:wbl_help
+    call add(l, g:wbl_separator)
+    call add(l, g:wbl_help_text)
   endif
 
   let w:dst_winnr = 0
