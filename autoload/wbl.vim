@@ -248,10 +248,10 @@ func wbl#open()
   let title = ' wbl '
   if exists('*popup_menu')
     " vim 8.1
-    let winid = cpm#popup_menu#open(title, l, 'wbl#handler', 'wbl#filter')
+    let winid = vis#popup_menu#open(title, l, 'wbl#handler', 'wbl#filter')
   elseif has('nvim') && exists('g:loaded_popup_menu')
     " nvim with the plugin 'Ajnasz/vim-popup-menu'
-    let winid = cpm#popup_menu#open(title, l, 'wbl#handler_str', '')
+    let winid = vis#popup_menu#open(title, l, 'wbl#handler_str', '')
   endif
   call win_execute(winid, 'setl syntax=wbl')
   return winid

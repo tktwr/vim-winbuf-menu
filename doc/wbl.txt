@@ -20,8 +20,8 @@ SETTING                                              *winbuf-menu-setting*
 
 Set mappings.
 >
-        nnoremap <silent> <End>  <C-W>:silent call WblPrint()<CR>
-        tnoremap <silent> <End>  <C-W>:silent call WblPrint()<CR>
+        nnoremap <silent> <End>  <C-W>:silent call wbl#open()<CR>
+        tnoremap <silent> <End>  <C-W>:silent call wbl#open()<CR>
 <
 ==========================================================================
 VARIABLE                                            *winbuf-menu-variable*
